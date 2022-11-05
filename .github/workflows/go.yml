@@ -17,10 +17,9 @@ jobs:
     env:
       GO111MODULE: off    
     steps:
-    - uses: actions/checkout@v3
-      with:
-          path: ./src/github.com/${{ github.repository }}
-          fetch-depth: 5
+
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Set up Go
       uses: actions/setup-go@v3
@@ -31,29 +30,12 @@ jobs:
       run: |
           go version
           go env
-          echo ${GOROOT}
-          echo ${GOPATH}
           
     - name: Install dependencies
-      env: 
-           GOPATH: ${{ runner.workspace }}
-      run: |
-          echo ${GOPATH}
-          pwd
-          go get .
+      run: go get .
 
     - name: Build
-      env: 
-           GOPATH: ${{ runner.workspace }}
-      run: |
-          echo ${GOPATH}
-          pwd
-          go build -v main.go
+      run: go build -v main.go
 
     - name: Test
-      env: 
-           GOPATH: ${{ runner.workspace }}
-      run: |
-          echo ${GOPATH}
-          pwd
-          go test -v main.go
+      run: go test -v main.go
