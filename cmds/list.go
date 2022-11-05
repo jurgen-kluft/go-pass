@@ -1,6 +1,8 @@
 package cmds
 
-import "fmt"
+import (
+	"github.com/jurgen-kluft/go-pass/repo"
+)
 
 type ListCmd struct {
 	Group    string `short:"g" help:"Group filter."`
@@ -8,6 +10,8 @@ type ListCmd struct {
 }
 
 func (a *ListCmd) Run(globals *Globals) error {
-	fmt.Printf("List: %s\n", "")
+	r := &repo.Repo{}
+	r.Root = "/Users/obnosis5/Documents/Vault"
+	r.Scan()
 	return nil
 }
