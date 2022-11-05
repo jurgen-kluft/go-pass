@@ -4,6 +4,16 @@ import "fmt"
 
 // - copy [ --force, -f ] old-path new-path
 
+/*
+cp [ --force, -f ] old-path new-path
+
+Copies the password or directory named old-path to new-path.
+
+This command is alternatively named copy. If --force is specified, silently overwrite
+new-path if it exists. If new-path ends in a trailing /, it is always treated as a directory.
+Passwords are selectively reencrypted to the corresponding keys of their new destination.
+
+*/
 type CopyCmd struct {
 	Force   bool   `short:"f" help:"Force copy even if 'new-path' exists"`
 	OldPath string `arg:"" help:"Old pass name to use as source."`

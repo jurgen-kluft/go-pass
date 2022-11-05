@@ -23,8 +23,8 @@ tags
 !*.csproj
 !*.resx
 
-!*.hlsl
-!*.fragment
+!*.mod
+!*.sum
 
 !*.md
 !*.jpg
