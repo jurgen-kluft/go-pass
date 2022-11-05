@@ -37,14 +37,23 @@ jobs:
     - name: Install dependencies
       env: 
            GOPATH: ${{ runner.workspace }}
-      run: go get .
+      run: |
+          echo ${GOPATH}
+          pwd
+          go get .
 
     - name: Build
       env: 
            GOPATH: ${{ runner.workspace }}
-      run: go build -v main.go
+      run: |
+          echo ${GOPATH}
+          pwd
+          go build -v main.go
 
     - name: Test
       env: 
            GOPATH: ${{ runner.workspace }}
-      run: go test -v main.go
+      run: |
+          echo ${GOPATH}
+          pwd
+          go test -v main.go
