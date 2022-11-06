@@ -72,8 +72,11 @@ func (r *Repo) GlobSearch(query string, seperators ...rune) ([]FileMatch, error)
 	matches := []FileMatch{}
 	for _, group := range r.Files {
 		for _, path := range group {
-			m, err := SearchInFile(path, func(line []byte) bool {
-				return g.Match(string(line))
+			m, err := SearchInFile(path, func(line []byte) error {
+				if g.Match(string(line)) {
+					return MatchError
+				}
+				return nil
 			})
 			if err == nil {
 				matches = append(matches, FileMatch{path, m})
@@ -83,12 +86,20 @@ func (r *Repo) GlobSearch(query string, seperators ...rune) ([]FileMatch, error)
 	return matches, nil
 }
 
+var (
+	MatchError     = errors.New("match")
+	TerminateError = errors.New("terminate")
+)
+
 func (r *Repo) DirectSearch(query string) ([]FileMatch, error) {
 	matches := []FileMatch{}
 	for _, group := range r.Files {
 		for _, path := range group {
-			m, err := SearchInFile(path, func(line []byte) bool {
-				return strings.Compare(string(line), query) == 0
+			m, err := SearchInFile(path, func(line []byte) error {
+				if strings.Compare(string(line), query) == 0 {
+					return MatchError
+				}
+				return nil
 			})
 			if err == nil {
 				matches = append(matches, FileMatch{path, m})
@@ -115,8 +126,11 @@ func (r *Repo) GrepSearch(query string) ([]FileMatch, error) {
 		matches := []FileMatch{}
 		for _, group := range r.Files {
 			for _, path := range group {
-				m, err := SearchInFile(path, func(line []byte) bool {
-					return reg.Match(line)
+				m, err := SearchInFile(path, func(line []byte) error {
+					if reg.Match(line) {
+						return MatchError
+					}
+					return nil
 				})
 				if err == nil {
 					matches = append(matches, FileMatch{path, m})
@@ -128,7 +142,7 @@ func (r *Repo) GrepSearch(query string) ([]FileMatch, error) {
 	return nil, err
 }
 
-func GetFileContentByLine(filename string, handleLine func(lineNumber int, line []byte)) error {
+func GetFileContentByLine(filename string, handleLine func(lineNumber int, line []byte) error) error {
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -146,35 +160,38 @@ func GetFileContentByLine(filename string, handleLine func(lineNumber int, line 
 				return errors.New("cannot show binary file")
 			}
 		}
-		handleLine(line, text)
+
+		err = handleLine(line, text)
+
+		if err == TerminateError {
+			break
+		} else if err != nil {
+			return nil
+		}
+
 		line++
 	}
 	return nil
 }
 
-func SearchInFile(filename string, compare func([]byte) bool) ([]Match, error) {
-
-	f, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
+func SearchInFile(filename string, compare func([]byte) error) ([]Match, error) {
 
 	linematches := []Match{}
-	line := 1
-	for scanner.Scan() {
-		text := scanner.Bytes()
-		if line == 1 {
-			if bytes.IndexByte(text, 0) != -1 {
-				return nil, errors.New("cannot search in binary file")
-			}
+
+	GetFileContentByLine(filename, func(lineNumber int, line []byte) error {
+
+		err := compare(line)
+
+		if err == MatchError {
+			linematches = append(linematches, Match{lineNumber, string(line)})
+		} else if err == TerminateError {
+			return err
+		} else if err != nil {
+			return err
 		}
-		if compare(text) {
-			linematches = append(linematches, Match{line, string(text)})
-		}
-		line++
-	}
+
+		return nil
+	})
+
 	return linematches, nil
 }

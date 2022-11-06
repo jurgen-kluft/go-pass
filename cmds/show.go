@@ -55,7 +55,7 @@ func (a *ShowCmd) Run(globals *Globals) error {
 				fmt.Printf("Pass '%s'\n", filename)
 				fmt.Println()
 
-				err := repo.GetFileContentByLine(fullFilename, func(lineNumber int, line []byte) {
+				err := repo.GetFileContentByLine(fullFilename, func(lineNumber int, line []byte) error {
 					if a.QrCode {
 						if lineNumber == a.Line {
 							qrcode = string(line)
@@ -77,6 +77,8 @@ func (a *ShowCmd) Run(globals *Globals) error {
 					} else {
 						fmt.Printf("%s\n", string(line))
 					}
+
+					return nil
 				})
 				if err != nil {
 					fmt.Printf("Error: %s\n", err.Error())
