@@ -34,7 +34,7 @@ func main() {
 	}
 
 	ctx := kong.Parse(&cli,
-		kong.Name("pass"),
+		kong.Name("gpw"),
 		kong.Description("managing passwords"),
 		kong.UsageOnError(),
 		kong.ConfigureHelp(kong.HelpOptions{
