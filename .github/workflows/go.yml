@@ -37,7 +37,7 @@ jobs:
 
     - name: Test
       run: | 
-          go test -v glob/compiler/match
+          go test -v glob/match
           go test -v glob/compiler
           go test -v glob/syntax/ast
           go test -v glob/syntax/lexer
