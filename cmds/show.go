@@ -15,11 +15,11 @@ import (
 // - show [ --line[=line-number or field-name], -l[line-number or field-name] ] [--qrcode[=line-number or field-name], -q[line-number or field-name] ] pass-name
 
 type ShowCmd struct {
-	LineNumbers bool    `optional:"" short:"l" help:"Show the content with line numbers"`
-	Line        *int    `optional:"" short:"i" help:"Show the content of a specific line"`
-	Field       *string `optional:"" short:"f" help:"Show the content of a specific field"`
-	QrCode      *string `optional:"" short:"q" help:"Show the content of a specific field as a QR code (e.g. -q \"site\")"`
-	PassName    string  `arg:"" help:"Pass name."`
+	LineNumbers bool   `optional:"" short:"l" help:"Show the content with line numbers"`
+	Line        int    `optional:"" short:"i" help:"Show the content of a specific line"`
+	Field       string `optional:"" short:"f" help:"Show the content of a specific field"`
+	QrCode      bool   `optional:"" short:"q" help:"Show the content as a QR code"`
+	PassName    string `arg:"" help:"Pass name."`
 }
 
 func (a *ShowCmd) Run(globals *Globals) error {
@@ -33,6 +33,7 @@ func (a *ShowCmd) Run(globals *Globals) error {
 	fmt.Println(r.Root)
 
 	qrcode := ""
+	fullQrCode := ""
 	if a.PassName != "" {
 		wordsToTest := []string{}
 		for _, gr := range r.Files {
@@ -55,17 +56,24 @@ func (a *ShowCmd) Run(globals *Globals) error {
 				fmt.Println()
 
 				err := repo.GetFileContentByLine(fullFilename, func(lineNumber int, line []byte) {
-
-					if a.QrCode != nil {
-						if strings.HasPrefix(string(line), *a.QrCode) {
+					if a.QrCode {
+						if lineNumber == a.Line {
 							qrcode = string(line)
 						}
+						if len(a.Field) > 0 {
+							if strings.HasPrefix(string(line), a.Field) {
+								qrcode = string(line)
+							}
+						}
+						fullQrCode = fullQrCode + " / " + string(line)
 					}
 
 					if a.LineNumbers {
 						fmt.Printf("%d: %s\n", lineNumber, string(line))
-					} else if a.Line != nil && *a.Line == lineNumber {
-						fmt.Printf("%s\n", string(line))
+					} else if a.Line >= 0 {
+						if a.Line == lineNumber {
+							fmt.Printf("%s\n", string(line))
+						}
 					} else {
 						fmt.Printf("%s\n", string(line))
 					}
@@ -77,13 +85,24 @@ func (a *ShowCmd) Run(globals *Globals) error {
 		}
 	}
 
-	if a.QrCode != nil && qrcode != "" {
-		// Generate a 'dense' qrcode with the 'Low' level error correction and write it to Stdout
-		qrcode = qrcode[len(*a.QrCode)+1:]
-		qrcode = strings.TrimSpace(qrcode)
+	if a.QrCode {
+		if len(qrcode) > 0 {
+			// Generate a 'dense' qrcode with the 'Low' level error correction and write it to Stdout
+			qrcode = qrcode[len(*&a.Field):]
+			qrcode = strings.TrimSpace(qrcode)
 
-		fmt.Printf("QR code: %s\n", qrcode)
-		qrterminal.Generate(qrcode, qrterminal.L, os.Stdout)
+			// Check if QR code strings starts with the name of a field followed by a ':', e.g. 'name:'
+			// If so remove that (prefix) field from the QR code string
+			if strings.Contains(qrcode, ":") {
+				field := qrcode[:strings.Index(qrcode, ":")+1]
+				if strings.HasPrefix(qrcode, field) {
+					qrcode = qrcode[len(field):]
+				}
+			}
+			qrterminal.Generate(qrcode, qrterminal.L, os.Stdout)
+		} else if len(fullQrCode) > 0 {
+			qrterminal.Generate(fullQrCode, qrterminal.L, os.Stdout)
+		}
 	}
 
 	return nil
