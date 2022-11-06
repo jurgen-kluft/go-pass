@@ -10,7 +10,7 @@ import (
 	"github.com/jurgen-kluft/go-pass/repo"
 )
 
-// - show [ --clip[=line-number or field-name], -c[line-number or field-name] ] [--qrcode[=line-number or field-name], -q[line-number or field-name] ] pass-name
+// - show [ --line[=line-number or field-name], -l[line-number or field-name] ] [--qrcode[=line-number or field-name], -q[line-number or field-name] ] pass-name
 
 type ShowCmd struct {
 	PassName string `arg:"" help:"Pass name."`
