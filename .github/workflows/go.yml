@@ -36,7 +36,18 @@ jobs:
       run: go build -v main.go
 
     - name: Test
-      run: go test -v main.go
+      run: | 
+          go test -v glob/compiler/match
+          go test -v glob/compiler
+          go test -v glob/syntax/ast
+          go test -v glob/syntax/lexer
+          go test -v glob/util/runes
+          go test -v glob/utils/strings
+          go test -v glob/
+          go test -v qrterminal/qrcode/coding
+          go test -v qrterminal/qrcode/gf256
+          go test -v password/
+          go test -v main.go
 
   build-test-windows:
     runs-on: windows-latest
