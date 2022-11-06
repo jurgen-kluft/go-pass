@@ -45,7 +45,11 @@ var (
 	missingCommands = errors.New("No clipboard utilities available. Please install xsel, xclip, wl-clipboard or Termux:API add-on for termux-clipboard-get/set.")
 )
 
+var Unsupported = true
+
 func init() {
+	Unsupported = true
+
 	if os.Getenv("WAYLAND_DISPLAY") != "" {
 		pasteCmdArgs = wlpasteArgs
 		copyCmdArgs = wlcopyArgs
