@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,31 +21,53 @@ type Repo struct {
 }
 
 func (r *Repo) Scan() error {
-	fmt.Println(r.Root)
+
+	// Start with a new and empty map
+	r.Files = make(map[string][]string)
+
+	// check if the directory in r.Root exists
+	if _, err := os.Stat(r.Root); os.IsNotExist(err) {
+		return errors.New("Root directory does not exist")
+	}
+
+	n := len(r.Root) + 1
 
 	filepath.Walk(r.Root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
 		if info.IsDir() {
+			// hidden directories to be ignored
 			if info.Name() == ".git" {
 				return filepath.SkipDir
 			}
 		} else {
-			//fmt.Println(path)
-			fmt.Printf("File Name: %s\n", info.Name())
+			fp := path[n:]
+			dir := filepath.Dir(fp)
+
+			// files to ignore
+			if info.Name() == ".DS_Store" {
+				return nil
+			}
+
+			// directories to include (rest is ignored)
+			if dir == "people" || dir == "email" || dir == "phone" || dir == "sites" {
+				if _, ok := r.Files[dir]; !ok {
+					r.Files[dir] = []string{}
+				}
+				r.Files[dir] = append(r.Files[dir], fp)
+			}
 		}
 		return nil
 	})
-
 	return nil
 }
 
 // Search the repo using 'glob' patterns
-func (r *Repo) GlobSearch(query string, seperators ...rune) []FileMatch {
+func (r *Repo) GlobSearch(query string, seperators ...rune) ([]FileMatch, error) {
 	g, err := glob.Compile(query, seperators...)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	matches := []FileMatch{}
 	for _, group := range r.Files {
@@ -59,10 +80,10 @@ func (r *Repo) GlobSearch(query string, seperators ...rune) []FileMatch {
 			}
 		}
 	}
-	return matches
+	return matches, nil
 }
 
-func (r *Repo) DirectSearch(query string) []FileMatch {
+func (r *Repo) DirectSearch(query string) ([]FileMatch, error) {
 	matches := []FileMatch{}
 	for _, group := range r.Files {
 		for _, path := range group {
@@ -74,7 +95,7 @@ func (r *Repo) DirectSearch(query string) []FileMatch {
 			}
 		}
 	}
-	return matches
+	return matches, nil
 }
 
 type Match struct {
@@ -88,7 +109,7 @@ type FileMatch struct {
 }
 
 // Search the repo using 'grep'
-func (r *Repo) GrepSearch(query string) []FileMatch {
+func (r *Repo) GrepSearch(query string) ([]FileMatch, error) {
 	reg, err := regexp.Compile(query)
 	if err == nil {
 		matches := []FileMatch{}
@@ -102,12 +123,12 @@ func (r *Repo) GrepSearch(query string) []FileMatch {
 				}
 			}
 		}
-		return matches
+		return matches, nil
 	}
-	return nil
+	return nil, err
 }
 
-func SearchInFile(filename string, compare func([]byte) bool) (linematches []Match, err error) {
+func SearchInFile(filename string, compare func([]byte) bool) ([]Match, error) {
 
 	f, err := os.Open(filename)
 	if err != nil {
@@ -117,6 +138,7 @@ func SearchInFile(filename string, compare func([]byte) bool) (linematches []Mat
 
 	scanner := bufio.NewScanner(f)
 
+	linematches := []Match{}
 	line := 1
 	for scanner.Scan() {
 		text := scanner.Bytes()
