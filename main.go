@@ -23,12 +23,12 @@ type CLI struct {
 	Remove   cmds.RemoveCmd   `cmd:"" help:"Remove/Delete an existing pass entry"`
 	Rename   cmds.RenameCmd   `cmd:"" help:"Rename/Move an existing pass entry"`
 	Copy     cmds.CopyCmd     `cmd:"" help:"Copy/Duplicate an existing pass entry"`
-	QrCode   cmds.QrCodeCmd   `cmd:"" help:"Display the Qr code of the field of an existing entry"`
 }
 
 func main() {
 	cli := CLI{
 		Globals: cmds.Globals{
+			Root:    "$HOME/Documents/Vault",
 			Version: cmds.VersionFlag(VERSION),
 		},
 	}

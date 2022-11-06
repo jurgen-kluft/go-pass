@@ -60,16 +60,6 @@ func (a *GenerateCmd) Run(globals *Globals) error {
 		a.Length = numLowerChars + numUpperChars + a.Numbers + a.Symbols
 	}
 
-	fmt.Printf("Symbols: %d\n", a.Symbols)
-	fmt.Printf("Numbers: %d\n", a.Numbers)
-	fmt.Printf("In place: %v\n", a.InPlace)
-	if a.Form != nil {
-		fmt.Printf("Form: %s\n", *a.Form)
-	}
-	fmt.Printf("Length: %d\n", a.Length)
-	fmt.Printf("Pass name: %s\n", a.PassName)
-	fmt.Printf("Copy to clipboard: %v\n", a.Clip)
-
 	// Generate(length, numDigits, numSymbols int, noUpper, allowRepeat bool) (string, error) {
 	res, err := password.Generate(a.Length, a.Numbers, a.Symbols, !a.Mixed, !a.Unique)
 	if err != nil {

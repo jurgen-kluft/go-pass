@@ -51,7 +51,7 @@ func (r *Repo) Scan() error {
 			}
 
 			// directories to include (rest is ignored)
-			if dir == "people" || dir == "email" || dir == "phone" || dir == "sites" {
+			if dir == "people" || dir == "email" || dir == "phone" || dir == "sites" || dir == "devices" {
 				if _, ok := r.Files[dir]; !ok {
 					r.Files[dir] = []string{}
 				}

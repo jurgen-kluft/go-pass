@@ -23,14 +23,9 @@ type ShowCmd struct {
 }
 
 func (a *ShowCmd) Run(globals *Globals) error {
-	r := &repo.Repo{}
-
-	r.Root = "$HOME/Documents/Vault"
+	r := &repo.Repo{Root: globals.Root}
 	r.Root = os.ExpandEnv(r.Root)
-
 	r.Scan()
-
-	fmt.Println(r.Root)
 
 	qrcode := ""
 	fullQrCode := ""

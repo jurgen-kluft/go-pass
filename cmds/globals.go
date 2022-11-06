@@ -7,7 +7,7 @@ import (
 )
 
 type Globals struct {
-	Root    string      `help:"Location of password repo" default:"$HOME/Documents/Vault" type:"path"`
+	Root    string      `help:"Location of password repo" default:"$HOME/Documents/Vault"`
 	Version VersionFlag `name:"version" help:"Print version information and quit"`
 }
 

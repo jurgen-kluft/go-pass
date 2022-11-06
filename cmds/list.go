@@ -1,6 +1,8 @@
 package cmds
 
 import (
+	"os"
+
 	"github.com/jurgen-kluft/go-pass/closestmatch"
 	"github.com/jurgen-kluft/go-pass/repo"
 )
@@ -18,9 +20,8 @@ type ListCmd struct {
 }
 
 func (a *ListCmd) Run(globals *Globals) error {
-	r := &repo.Repo{}
-
-	r.Root = "/Users/obnosis5/Documents/Vault"
+	r := &repo.Repo{Root: globals.Root}
+	r.Root = os.ExpandEnv(r.Root)
 	r.Scan()
 
 	if a.SubFolder == "" {

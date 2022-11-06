@@ -15,7 +15,7 @@ type GrepCmd struct {
 	Content bool   `short:"c" help:"Search in content."`
 	BuiltIn string `short:"b" help:"Search in using built-in grep command (e.g. url, email, phone)."`
 	Grep    string `arg:"" help:"Use grep to find a matching pass entry."`
-	SubGrep string `arg:"" help:"Use sub-grep to find a match in the found text."`
+	SubGrep string `arg:"" optional:"" help:"Use sub-grep to find a match in the found text."`
 }
 
 // a map for built-in grep functions
@@ -26,16 +26,11 @@ var builtInGrep = map[string]string{
 }
 
 func (a *GrepCmd) Run(globals *Globals) error {
-	r := &repo.Repo{}
-
-	r.Root = "$HOME/Documents/Vault"
+	r := &repo.Repo{Root: globals.Root}
 	r.Root = os.ExpandEnv(r.Root)
-
 	r.Scan()
 
 	if a.Grep != "" {
-
-		fmt.Println(a.Grep)
 
 		rx, err := regexp.Compile(a.Grep)
 		if err != nil {
@@ -57,9 +52,13 @@ func (a *GrepCmd) Run(globals *Globals) error {
 
 				matches, err := repo.SearchInFile(filename, func(text []byte) error {
 					if rx.Match(text) {
-						found := rx.Find(text)
-						if sx == nil || sx.Match(found) {
+						if sx == nil {
 							return repo.MatchError
+						} else {
+							found := rx.Find(text)
+							if sx.Match(found) {
+								return repo.MatchError
+							}
 						}
 					}
 					return nil
