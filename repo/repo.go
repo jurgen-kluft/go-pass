@@ -128,6 +128,30 @@ func (r *Repo) GrepSearch(query string) ([]FileMatch, error) {
 	return nil, err
 }
 
+func GetFileContentByLine(filename string, handleLine func(lineNumber int, line []byte)) error {
+
+	f, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+
+	line := 1
+	for scanner.Scan() {
+		text := scanner.Bytes()
+		if line == 1 {
+			if bytes.IndexByte(text, 0) != -1 {
+				return errors.New("cannot show binary file")
+			}
+		}
+		handleLine(line, text)
+		line++
+	}
+	return nil
+}
+
 func SearchInFile(filename string, compare func([]byte) bool) ([]Match, error) {
 
 	f, err := os.Open(filename)

@@ -7,7 +7,7 @@ import (
 )
 
 type Globals struct {
-	Config  string      `help:"Location of config file" default:"$(HOME)/.gpw" type:"path"`
+	Root    string      `help:"Location of password repo" default:"$HOME/Documents/Vault" type:"path"`
 	Version VersionFlag `name:"version" help:"Print version information and quit"`
 }
 
