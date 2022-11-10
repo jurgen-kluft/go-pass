@@ -25,7 +25,9 @@ type ShowCmd struct {
 func (a *ShowCmd) Run(globals *Globals) error {
 	r := &repo.Repo{Root: globals.Root}
 	r.Root = os.ExpandEnv(r.Root)
-	r.Scan()
+	if err := r.Scan(); err != nil {
+		return err
+	}
 
 	qrcode := ""
 	fullQrCode := ""
@@ -65,7 +67,7 @@ func (a *ShowCmd) Run(globals *Globals) error {
 
 					if a.LineNumbers {
 						fmt.Printf("%d: %s\n", lineNumber, string(line))
-					} else if a.Line >= 0 {
+					} else if a.Line > 0 {
 						if a.Line == lineNumber {
 							fmt.Printf("%s\n", string(line))
 						}

@@ -26,9 +26,9 @@ type SearchCmd struct {
 func (a *SearchCmd) Run(globals *Globals) error {
 	r := &repo.Repo{Root: globals.Root}
 	r.Root = os.ExpandEnv(r.Root)
-	r.Scan()
-
-	fmt.Println(r.Root)
+	if err := r.Scan(); err != nil {
+		return err
+	}
 
 	if a.Search != "" {
 		wordsToTest := []string{}

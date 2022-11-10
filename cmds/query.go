@@ -6,7 +6,7 @@ package cmds
 gpw query [query]
 
 Show the age of all email password-store entries older than 1 year, by looking at the git log.
-gpw query "name ~= email AND age >= 1y"
+gpw query "name = email AND age >= 1y"
 
 Possible variables:
 

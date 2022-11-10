@@ -18,7 +18,9 @@ type SetEnvCmd struct {
 func (a *SetEnvCmd) Run(globals *Globals) error {
 	r := &repo.Repo{Root: globals.Root}
 	r.Root = os.ExpandEnv(r.Root)
-	r.Scan()
+	if err := r.Scan(); err != nil {
+		return err
+	}
 
 	for _, gr := range r.Files {
 		for _, f := range gr {

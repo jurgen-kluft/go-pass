@@ -22,7 +22,9 @@ type ListCmd struct {
 func (a *ListCmd) Run(globals *Globals) error {
 	r := &repo.Repo{Root: globals.Root}
 	r.Root = os.ExpandEnv(r.Root)
-	r.Scan()
+	if err := r.Scan(); err != nil {
+		return err
+	}
 
 	if a.SubFolder == "" {
 		for _, gr := range r.Files {

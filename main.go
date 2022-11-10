@@ -1,6 +1,8 @@
 package main
 
 import (
+	"runtime"
+
 	kong "github.com/alecthomas/kong"
 	cmds "github.com/jurgen-kluft/go-pass/cmds"
 )
@@ -28,7 +30,7 @@ type CLI struct {
 func main() {
 	cli := CLI{
 		Globals: cmds.Globals{
-			Root:    "$HOME/Documents/Vault",
+			Root:    "",
 			Version: cmds.VersionFlag(VERSION),
 		},
 	}
@@ -43,6 +45,13 @@ func main() {
 		kong.Vars{
 			"version": VERSION,
 		})
+
+	if runtime.GOOS == "windows" {
+		cli.Globals.Root = "E:\\Dev.Keybase\\Vault"
+	} else if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+		cli.Globals.Root = "$HOME/Documents/Vault"
+	}
+
 	err := ctx.Run(&cli.Globals)
 	ctx.FatalIfErrorf(err)
 }
